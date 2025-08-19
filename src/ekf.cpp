@@ -1,0 +1,73 @@
+#include"ekf.hpp"
+
+EKF::EKF(Eigen::Matrix2f& R,
+         Eigen::Matrix3f& Q,
+         Eigen::Matrix3f& P0,
+         Eigen::Vector3f& X0)
+    : R_(R), Q_(Q), P0_(P0), X0_(X0)
+{}
+
+void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
+    float& x_prev = X_prev(0);
+    float& y_prev = X_prev(1);
+    float& theta_prev = X_prev(2);
+
+    float& v = U(0);
+    float& w = U(1);
+
+    F_ << 1, 0, -v*sin(theta_prev),
+          0, 1,  v*cos(theta_prev),
+          0, 0,  1;
+    
+    X_hat(0) = x_prev + v*cos(theta_prev);
+    X_hat(1) = y_prev + v*sin(theta_prev);
+    X_hat(2) = theta_prev + w;
+
+    P_hat = F_*P*F_.transpose() + Q_;
+
+    std::cout << "EKF prediction: " << std::endl;
+    std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
+}
+
+void EKF::update(const Measurement& Z, const Landmark& lm) {
+
+            Eigen::Vector2f Z_vec;
+            Z_vec(0) = Z.range;
+            Z_vec(1) = Z.bearing;
+
+            float& x = X_hat(0);
+            float& y = X_hat(1);
+            float& theta = X_hat(2);
+
+            float dx = lm.x - x;
+            float dy = lm.y - y;
+
+            float q = dx*dx + dy*dy;
+
+            float range = std::sqrt(q);
+            float bearing = std::atan2(dy, dx) - theta;
+
+            // Normalize bearing to [-pi, pi]
+            if (bearing > M_PI) bearing -= 2 * M_PI;
+            if (bearing < -M_PI) bearing += 2 * M_PI;
+
+            //Compute H matrix
+            H_ <<  -dx/sqrt(q), -dy/sqrt(q), 0,
+                    dy/q      , -dx/q, -1;
+
+            S_in = H_*P_hat*H_.transpose() + R_;
+            Kt = P_hat * H_.transpose() * S_in.inverse();
+
+            Z_hat(0) = range;
+            Z_hat(1) = bearing;
+
+            X = X_hat + Kt*(Z_vec - Z_hat);
+            P = P_hat - Kt*S_in*Kt.transpose();
+
+            std::cout << "EKF update: " << std::endl;
+            std::cout << "x: " <<  X(0) << " y: " <<  X(1) << " Thet: " <<  X(2) << std::endl;
+
+            
+
+
+}
