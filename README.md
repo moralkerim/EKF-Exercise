@@ -38,8 +38,6 @@ You should see random robot poses, EKF prediction and EKF update poses.
 
 - `src/` - Source code
 - `include/` - Header files
-- `examples/` - Example usage
-- `tests/` - Unit tests
 
 ## References
 
