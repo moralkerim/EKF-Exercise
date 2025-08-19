@@ -24,14 +24,6 @@ Eigen::Vector3f X_prev({0.0f, 0.0f, 0.0f});
 
 EKF ekf(R, Q, P0, X0);
 
-struct Position {
-    double x;
-    double y;
-    double theta;
-
-    Position(double x_=0, double y_=0, double theta_=0) : x(x_), y(y_), theta(theta_) {}
-};
-
 
 class Robot {
 public:
@@ -67,46 +59,66 @@ public:
         std::cout << "Robot position: x=" << pos.x << ", y=" << pos.y << ", theta=" << pos.theta << std::endl;
     }
 
-    void senseLandmarks(const std::vector<Landmark>& landmarks,
-                        double range_limit = 10.0,
-                        double bearing_limit_deg = 90.0)
+    std::vector<Measurement> senseLandmarks(const std::unordered_map<int, std::shared_ptr<Landmark>> & landmarks,
+                            double range_limit = 10.0,
+                            double bearing_limit_deg = 90.0)
     {
         double bearing_limit_rad = bearing_limit_deg * M_PI / 180.0;
+        std::vector<Measurement> measurements;
 
         std::cout << "  Sensor readings:" << std::endl;
-        for (const auto& lm : landmarks) {
-            double dx = lm.x - pos.x;
-            double dy = lm.y - pos.y;
+        for (const auto& [id, lm] : landmarks) {  
+            double dx = lm->x - pos.x;
+            double dy = lm->y - pos.y;
 
             double range = std::sqrt(dx * dx + dy * dy) + range_noise(gen);
             double bearing = std::atan2(dy, dx) - pos.theta + bear_noise(gen);
+
 
             // Normalize bearing to [-pi, pi]
             if (bearing > M_PI) bearing -= 2 * M_PI;
             if (bearing < -M_PI) bearing += 2 * M_PI;
 
-            // Sadece görüş alanındaki landmark'ları göster
+            //Check if we have a measurement
             if (range <= range_limit && std::abs(bearing) <= bearing_limit_rad) {
-                std::cout << "    Landmark " << lm.id << ": range=" << range << ", bearing=" << bearing << std::endl;
-                Measurement z(range,bearing);
-                ekf.update(z, lm);
-                X_prev = ekf.X;
-
+                std::cout << "    Landmark " << id << ": range=" << range 
+                        << ", bearing=" << bearing << std::endl;
+                Measurement z(id, range, bearing); 
+                measurements.emplace_back(z);
             }
         }
+        return measurements;
     }
+
 
 };
 
+std::shared_ptr<Landmark> FindAssociation(
+    const Measurement& z,
+    const std::unordered_map<int, std::shared_ptr<Landmark>>& landmarks)
+{
+    auto it = landmarks.find(z.id);
+    if (it != landmarks.end()) {
+        auto lm = it->second;
+        std::cout << "Measurement " << z.id
+                  << " --> Landmark at (" << lm->x << ", " << lm->y << ")\n";
+        return lm; 
+    } else {
+        std::cout << "Landmark not found for id " << z.id << "\n";
+        return nullptr;
+    }
+}
+
 int main() {
     
-    auto robot_ptr = std::make_unique<Robot>(0.0, 0.0, 0.0);
+    Robot robot(0.0, 0.0, 0.0);
 
-    std::vector<Landmark> landmarks = {
-        {1, 3.0, 5.0},
-        {2, -1.0, 7.0},
-        {3, 8.0, -4.0}
-    };
+    // Landmarks as unordered maps
+    std::unordered_map<int, std::shared_ptr<Landmark>> landmarks;
+    landmarks.emplace(1, std::make_shared<Landmark>(1,  3.0f,  5.0f));
+    landmarks.emplace(2, std::make_shared<Landmark>(2, -1.0f,  7.0f));
+    landmarks.emplace(3, std::make_shared<Landmark>(3,  8.0f, -4.0f));
+
 
     double total_time = 5.0;
     double dt = 1.0;
@@ -114,22 +126,30 @@ int main() {
     double w = 0.1;    // Angular speed
 
     std::cout << "Başlangıç konumu:\n";
-    robot_ptr->print();
+    robot.print();
 
     Eigen::Vector2f U({v,w});
 
 
     for (double t = 0; t < total_time; t += dt) {
-        robot_ptr->move(v, w);
+        robot.move(v, w);
         std::cout << "\nt=" << t + dt << std::endl;
-        robot_ptr->print();
+        robot.print();
         ekf.predict(X_prev, U);
-        robot_ptr->senseLandmarks(landmarks);
-    }
+        auto measurements = robot.senseLandmarks(landmarks);
+        //Check if we have a measurement
+        if(!measurements.empty()) {
+            //Update EKF for all measurements
+            for(auto& z : measurements) {
+                auto lm = FindAssociation(z,landmarks);
+                if(lm) {
+                    ekf.update(z,lm);
+                    X_prev = ekf.X;
+                }
+            }
 
-    std::cout << "\nLandmark konumları:\n";
-    for (const auto& lm : landmarks) {
-        std::cout << "  Landmark " << lm.id << ": x=" << lm.x << ", y=" << lm.y << std::endl;
+        }
+        
     }
 
     return 0;

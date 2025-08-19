@@ -29,7 +29,7 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
 }
 
-void EKF::update(const Measurement& Z, const Landmark& lm) {
+void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
 
             Eigen::Vector2f Z_vec;
             Z_vec(0) = Z.range;
@@ -39,8 +39,8 @@ void EKF::update(const Measurement& Z, const Landmark& lm) {
             float& y = X_hat(1);
             float& theta = X_hat(2);
 
-            float dx = lm.x - x;
-            float dy = lm.y - y;
+            float dx = lm->x - x;
+            float dy = lm->y - y;
 
             float q = dx*dx + dy*dy;
 
