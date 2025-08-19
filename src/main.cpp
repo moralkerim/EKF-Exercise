@@ -21,8 +21,6 @@ Eigen::Matrix3f Q({{q_x, 0.0f, 0.0f}, {0.0f, q_y, 0.0f}, {0.0f, 0.0f, q_t}}); //
 Eigen::Matrix3f P0({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}); //Initial Cov. Matrix
 Eigen::Vector3f X0({0.0f, 0.0f, 0.0f}); //Initial pose
 
-Eigen::Vector3f X_prev({0.0f, 0.0f, 0.0f}); //Prev update
-
 //Create a shared logger file for both Robot and EKF
 auto logger = std::make_shared<Logger>("poses.txt");
 
@@ -77,7 +75,7 @@ int main() {
         robot.move(v, w); //Move and take samples
         std::cout << "\nt=" << t + dt << std::endl;
         robot.print();
-        ekf.predict(X_prev, U); //EKF Prediction step.
+        ekf.predict(ekf.X, U); //EKF Prediction step.
         auto measurements = robot.senseLandmarks(landmarks); //Take measurements
         //Check if we have a measurement
         if(!measurements.empty()) {
@@ -86,7 +84,6 @@ int main() {
                 auto lm = FindAssociation(z,landmarks);
                 if(lm) {
                     ekf.update(z,lm);
-                    X_prev = ekf.X;
                 }
             }
 
