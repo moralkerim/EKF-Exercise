@@ -1,4 +1,4 @@
-# EKF-SLAM Exercise
+# EKF Exercise
 
 This project demonstrates an implementation of the Extended Kalman Filter (EKF) using modern C++.
 
