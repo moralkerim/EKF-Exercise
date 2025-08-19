@@ -7,6 +7,12 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 
-add_library(ekf_lib src/ekf.cpp)
+# Library targets
+add_library(robot src/robot.cpp)
+add_library(ekf src/ekf.cpp)
+
+# Executable
 add_executable(ekf_main src/main.cpp)
-target_link_libraries(ekf_main ekf_lib)
+
+# Link libraries to executable
+target_link_libraries(ekf_main PRIVATE robot ekf)
