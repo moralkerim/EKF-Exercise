@@ -19,7 +19,7 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     float& v = U(0);
     float& w = U(1);
 
-    F_ << 1, 0, -v*sin(theta_prev),
+    F << 1, 0, -v*sin(theta_prev),
           0, 1,  v*cos(theta_prev),
           0, 0,  1;
     
@@ -27,7 +27,7 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     X_hat(1) = y_prev + v*sin(theta_prev);
     X_hat(2) = theta_prev + w;
 
-    P_hat = F_*P*F_.transpose() + Q;
+    P_hat = F*P*F.transpose() + Q;
 
     std::cout << "EKF prediction: " << std::endl;
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;

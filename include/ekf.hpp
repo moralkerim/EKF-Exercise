@@ -22,7 +22,7 @@ class EKF {
         void update(const Measurement& Z, const std::shared_ptr<Landmark>& lm);
 
     private:
-        Eigen::Matrix3f F_;
+        Eigen::Matrix3f F;
         Eigen::Matrix<float, 2, 3> H;
         Eigen::Matrix3f Q;
         Eigen::Matrix2f R;
