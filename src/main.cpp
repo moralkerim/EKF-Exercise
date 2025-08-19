@@ -7,8 +7,8 @@
 
 
 //EKF Noise parameters
-float sigma_d = 0.01;
-float sigma_a = 0.001;
+float sigma_d = 0.1;
+float sigma_a = 0.01;
 
 float q_x = 0.5;
 float q_y = 0.5;
