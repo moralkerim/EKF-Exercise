@@ -32,6 +32,8 @@ python3 plotter.py
 ```
 You should see random robot poses, EKF prediction and EKF update poses.
 
+![Example usage](example.png)
+
 ## Project Structure
 
 - `src/` - Source code
