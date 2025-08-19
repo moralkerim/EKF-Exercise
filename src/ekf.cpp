@@ -2,12 +2,12 @@
 
 
 
-EKF::EKF(Eigen::Matrix2f& R,
-         Eigen::Matrix3f& Q,
-         Eigen::Matrix3f& P0,
-         Eigen::Vector3f& X0,
+EKF::EKF(Eigen::Matrix2f& R_,
+         Eigen::Matrix3f& Q_,
+         Eigen::Matrix3f& P0_,
+         Eigen::Vector3f& X0_,
          std::shared_ptr<Logger>& logger_)
-    : R_(R), Q_(Q), P0_(P0), X0_(X0), logger(logger_)
+    : R(R_), Q(Q_), P0(P0_), X0(X0_), logger(logger_)
 {}
 
 
@@ -27,7 +27,7 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     X_hat(1) = y_prev + v*sin(theta_prev);
     X_hat(2) = theta_prev + w;
 
-    P_hat = F_*P*F_.transpose() + Q_;
+    P_hat = F_*P*F_.transpose() + Q;
 
     std::cout << "EKF prediction: " << std::endl;
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
@@ -57,11 +57,11 @@ void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
             if (bearing < -M_PI) bearing += 2 * M_PI;
 
             //Compute H matrix
-            H_ <<  -dx/sqrt(q), -dy/sqrt(q), 0,
+            H <<  -dx/sqrt(q), -dy/sqrt(q), 0,
                     dy/q      , -dx/q, -1;
 
-            S_in = H_*P_hat*H_.transpose() + R_;
-            Kt = P_hat * H_.transpose() * S_in.inverse();
+            S_in = H*P_hat*H.transpose() + R;
+            Kt = P_hat * H.transpose() * S_in.inverse();
 
             Z_hat(0) = range;
             Z_hat(1) = bearing;

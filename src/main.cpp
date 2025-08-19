@@ -6,6 +6,7 @@
 #include "ekf.hpp"
 
 
+//EKF Noise parameters
 float sigma_d = 0.01;
 float sigma_a = 0.001;
 
@@ -17,17 +18,19 @@ float q_t = 0.034;
 Eigen::Matrix2f R({{sigma_d, 0.0f}, {0.0f, sigma_a}}); //Measurement Noise
 Eigen::Matrix3f Q({{q_x, 0.0f, 0.0f}, {0.0f, q_y, 0.0f}, {0.0f, 0.0f, q_t}}); //Process Noise
 
-Eigen::Matrix3f P0({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}});
-Eigen::Vector3f X0({0.0f, 0.0f, 0.0f});
+Eigen::Matrix3f P0({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}); //Initial Cov. Matrix
+Eigen::Vector3f X0({0.0f, 0.0f, 0.0f}); //Initial pose
 
-Eigen::Vector3f X_prev({0.0f, 0.0f, 0.0f});
+Eigen::Vector3f X_prev({0.0f, 0.0f, 0.0f}); //Prev update
 
 //Create a shared logger file for both Robot and EKF
 auto logger = std::make_shared<Logger>("poses.txt");
 
+//Create EKF object
 EKF ekf(R, Q, P0, X0,logger);
 
 
+//Data association function, which measurement belong to which landmark?
 std::shared_ptr<Landmark> FindAssociation(
     const Measurement& z,
     const std::unordered_map<int, std::shared_ptr<Landmark>>& landmarks)
@@ -48,7 +51,7 @@ std::shared_ptr<Landmark> FindAssociation(
 int main() {
 
 
-    Robot robot(0.0, 0.0, 0.0,logger);
+    Robot robot(0.0, 0.0, 0.0,logger); //Robot object
 
 
     // Landmarks as unordered maps
@@ -66,15 +69,16 @@ int main() {
     std::cout << "Starting Position:\n";
     robot.print();
 
+    //Input vector
     Eigen::Vector2f U({v,w});
 
-
+    //Run for total time with dt steps
     for (double t = 0; t < total_time; t += dt) {
-        robot.move(v, w);
+        robot.move(v, w); //Move and take samples
         std::cout << "\nt=" << t + dt << std::endl;
         robot.print();
-        ekf.predict(X_prev, U);
-        auto measurements = robot.senseLandmarks(landmarks);
+        ekf.predict(X_prev, U); //EKF Prediction step.
+        auto measurements = robot.senseLandmarks(landmarks); //Take measurements
         //Check if we have a measurement
         if(!measurements.empty()) {
             //Update EKF for all measurements
