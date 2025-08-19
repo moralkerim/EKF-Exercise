@@ -7,15 +7,15 @@
 
 
 //EKF Noise parameters
-float sigma_d = 0.1;
-float sigma_a = 0.01;
+float r_d = 0.1;
+float r_a = 0.01;
 
 float q_x = 0.5;
 float q_y = 0.5;
 float q_t = 0.034;
 
 
-Eigen::Matrix2f R({{sigma_d, 0.0f}, {0.0f, sigma_a}}); //Measurement Noise
+Eigen::Matrix2f R({{r_d, 0.0f}, {0.0f, r_a}}); //Measurement Noise
 Eigen::Matrix3f Q({{q_x, 0.0f, 0.0f}, {0.0f, q_y, 0.0f}, {0.0f, 0.0f, q_t}}); //Process Noise
 
 Eigen::Matrix3f P0({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}); //Initial Cov. Matrix

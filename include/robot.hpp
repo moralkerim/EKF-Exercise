@@ -68,8 +68,8 @@ public:
     : pos(x, y, theta),
       dist_noise(0.0,  q_x),     // 0.1m std dev
       angle_noise(0.0, q_t),   // 1 degree ≈ 0.017 rad
-      range_noise(0.0, sigma_d),     // 0.1m std dev
-      bear_noise(0.0, sigma_a),   // 1 degree ≈ 0.017 rad
+      range_noise(0.0, r_d),     // 0.1m std dev
+      bear_noise(0.0, r_a),   // 1 degree ≈ 0.017 rad
       logger(logger_)
     {}
     void move(double distance, double angle);
@@ -84,8 +84,8 @@ public:
 
 private:
     std::shared_ptr<Logger> logger;
-    float sigma_d = 0.01;
-    float sigma_a = 0.001;
+    float r_d = 0.01;
+    float r_a = 0.001;
 
     float q_x = 0.5;
     float q_y = 0.5;
