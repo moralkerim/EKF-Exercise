@@ -5,12 +5,14 @@
 #include <memory>
 #include "ekf.hpp"
 
-float sigma_d = 0.1;
+const int SAMPLE_NUMBER = 50;
+
+float sigma_d = 0.01;
 float sigma_a = 0.001;
 
 float q_x = 0.5;
 float q_y = 0.5;
-float q_t = 0.017;
+float q_t = 0.084;
 
 
 Eigen::Matrix2f R({{sigma_d, 0.0f}, {0.0f, sigma_a}}); //Measurement Noise
@@ -48,13 +50,21 @@ public:
 
     void move(double distance, double angle) {
         // Gürültü ekle
-        double noisy_distance = distance + dist_noise(gen);
-        double noisy_angle = angle + angle_noise(gen);
+        Position pos_sample;
+        for(int i=0;i<SAMPLE_NUMBER-1;i++) {
+            double noisy_distance = distance + dist_noise(gen);
+            double noisy_angle = angle + angle_noise(gen);
 
-        pos.theta += noisy_angle;
-        pos.x += noisy_distance * cos(pos.theta);
-        pos.y += noisy_distance * sin(pos.theta);
-        logger->logPosition("Gaussian",pos);
+            pos_sample.theta = pos.theta + noisy_angle;
+            pos_sample.x = pos.x + noisy_distance * cos(pos_sample.theta);
+            pos_sample.y = pos.y + noisy_distance * sin(pos_sample.theta);
+            logger->logPosition("Gaussian",pos_sample);
+        }
+
+            pos.theta = pos_sample.theta;
+            pos.x = pos_sample.x;
+            pos.y = pos_sample.y;
+            logger->logPosition("Actual",pos);
     }
 
 
@@ -125,14 +135,14 @@ int main() {
     // Landmarks as unordered maps
     std::unordered_map<int, std::shared_ptr<Landmark>> landmarks;
     landmarks.emplace(1, std::make_shared<Landmark>(1,  5.0f,  5.0f));
-    landmarks.emplace(2, std::make_shared<Landmark>(2, -2.0f,  7.0f));
-    landmarks.emplace(3, std::make_shared<Landmark>(3,  8.0f, -4.0f));
+    landmarks.emplace(2, std::make_shared<Landmark>(2,  6.0f,  8.0f));
+    landmarks.emplace(3, std::make_shared<Landmark>(3,  7.0f,  12.0f));
 
 
     double total_time = 5.0;
     double dt = 1.0;
-    double v = 1.0;    // Linear speed
-    double w = 0.1;    // Angular speed
+    double v = 3.0;    // Linear speed
+    double w = 0.3;    // Angular speed
 
     std::cout << "Starting Position:\n";
     robot.print();
@@ -159,6 +169,11 @@ int main() {
 
         }
         
+    }
+
+    //Put Landmarks to the log
+    for(const auto& [id,lm] : landmarks) {
+        logger->logPosition("Landmark",Position(lm->x,lm->y,0));
     }
 
     return 0;

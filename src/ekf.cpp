@@ -1,5 +1,7 @@
 #include"ekf.hpp"
 
+
+
 EKF::EKF(Eigen::Matrix2f& R,
          Eigen::Matrix3f& Q,
          Eigen::Matrix3f& P0,
@@ -7,6 +9,7 @@ EKF::EKF(Eigen::Matrix2f& R,
          std::shared_ptr<Logger>& logger_)
     : R_(R), Q_(Q), P0_(P0), X0_(X0), logger(logger_)
 {}
+
 
 void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     float& x_prev = X_prev(0);
@@ -68,6 +71,7 @@ void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
 
             std::cout << "EKF update: " << std::endl;
             std::cout << "x: " <<  X(0) << " y: " <<  X(1) << " Thet: " <<  X(2) << std::endl;
+            logger->logPosition("Update",Position(X(0),X(1),X(2)));
 
             
 
