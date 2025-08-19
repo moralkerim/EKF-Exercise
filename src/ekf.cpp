@@ -3,8 +3,9 @@
 EKF::EKF(Eigen::Matrix2f& R,
          Eigen::Matrix3f& Q,
          Eigen::Matrix3f& P0,
-         Eigen::Vector3f& X0)
-    : R_(R), Q_(Q), P0_(P0), X0_(X0)
+         Eigen::Vector3f& X0,
+         std::shared_ptr<Logger>& logger_)
+    : R_(R), Q_(Q), P0_(P0), X0_(X0), logger(logger_)
 {}
 
 void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
@@ -27,6 +28,7 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
 
     std::cout << "EKF prediction: " << std::endl;
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
+    logger->logPosition("Prediction",Position(X_hat(0),X_hat(1),X_hat(2)));
 }
 
 void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {

@@ -21,9 +21,10 @@ Eigen::Vector3f X0({0.0f, 0.0f, 0.0f});
 
 Eigen::Vector3f X_prev({0.0f, 0.0f, 0.0f});
 
+//Create a shared logger file for both Robot and EKF
+auto logger = std::make_shared<Logger>("poses.txt");
 
-EKF ekf(R, Q, P0, X0);
-
+EKF ekf(R, Q, P0, X0,logger);
 
 class Robot {
 public:
@@ -36,12 +37,13 @@ public:
     std::normal_distribution<double> range_noise;
     std::normal_distribution<double> bear_noise;
 
-    Robot(double x=0, double y=0, double theta=0)
+    Robot(double x=0, double y=0, double theta=0, std::shared_ptr<Logger> logger_ = nullptr)
     : pos(x, y, theta),
       dist_noise(0.0,  q_x),     // 0.1m std dev
       angle_noise(0.0, q_t),   // 1 degree ≈ 0.017 rad
       range_noise(0.0, sigma_d),     // 0.1m std dev
-      bear_noise(0.0, sigma_a)   // 1 degree ≈ 0.017 rad
+      bear_noise(0.0, sigma_a),   // 1 degree ≈ 0.017 rad
+      logger(logger_)
     {}
 
     void move(double distance, double angle) {
@@ -52,7 +54,9 @@ public:
         pos.theta += noisy_angle;
         pos.x += noisy_distance * cos(pos.theta);
         pos.y += noisy_distance * sin(pos.theta);
+        logger->logPosition("Gaussian",pos);
     }
+
 
 
     void print() const {
@@ -89,7 +93,9 @@ public:
         }
         return measurements;
     }
-
+    
+private:
+    std::shared_ptr<Logger> logger;
 
 };
 
@@ -109,14 +115,17 @@ std::shared_ptr<Landmark> FindAssociation(
     }
 }
 
+
 int main() {
-    
-    Robot robot(0.0, 0.0, 0.0);
+
+
+    Robot robot(0.0, 0.0, 0.0,logger);
+
 
     // Landmarks as unordered maps
     std::unordered_map<int, std::shared_ptr<Landmark>> landmarks;
-    landmarks.emplace(1, std::make_shared<Landmark>(1,  3.0f,  5.0f));
-    landmarks.emplace(2, std::make_shared<Landmark>(2, -1.0f,  7.0f));
+    landmarks.emplace(1, std::make_shared<Landmark>(1,  5.0f,  5.0f));
+    landmarks.emplace(2, std::make_shared<Landmark>(2, -2.0f,  7.0f));
     landmarks.emplace(3, std::make_shared<Landmark>(3,  8.0f, -4.0f));
 
 
@@ -125,7 +134,7 @@ int main() {
     double v = 1.0;    // Linear speed
     double w = 0.1;    // Angular speed
 
-    std::cout << "Başlangıç konumu:\n";
+    std::cout << "Starting Position:\n";
     robot.print();
 
     Eigen::Vector2f U({v,w});
