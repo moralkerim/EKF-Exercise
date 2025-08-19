@@ -39,11 +39,6 @@ You should see random robot poses, EKF prediction and EKF update poses.
 - `src/` - Source code
 - `include/` - Header files
 
-## References
-
-- [Probabilistic Robotics by Thrun, Burgard, and Fox](https://probabilistic-robotics.org/)
-
-
 ## License
 
 This project is licensed under the MIT License.
