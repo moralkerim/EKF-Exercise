@@ -42,8 +42,8 @@ float q_y = 0.5;
 float q_t = 0.034;
 
 
-Eigen::Matrix2f R({{r_d, 0.0f}, {0.0f, r_a}}); //Measurement Noise
-Eigen::Matrix3f Q({{q_x, 0.0f, 0.0f}, {0.0f, q_y, 0.0f}, {0.0f, 0.0f, q_t}}); //Process Noise
+Eigen::Matrix2f R({{r_d*r_d, 0.0f}, {0.0f, r_a*r_a}}); //Measurement Noise
+Eigen::Matrix3f Q({{q_x*q_x, 0.0f, 0.0f}, {0.0f, q_y*q_y, 0.0f}, {0.0f, 0.0f, q_t*q_t}}); //Process Noise
 
 Eigen::Matrix3f P0({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}); //Initial Cov. Matrix
 Eigen::Vector3f X0({0.0f, 0.0f, 0.0f}); //Initial pose
