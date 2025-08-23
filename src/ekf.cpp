@@ -29,6 +29,10 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
 
     P_hat = F*P*F.transpose() + Q;
 
+    //Make X equal to X_hat, for no update situations
+    X = X_hat;
+    P = P_hat;
+
     std::cout << "EKF prediction: " << std::endl;
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
     logger->logPosition("Prediction",Position(X_hat(0),X_hat(1),X_hat(2)));
@@ -53,8 +57,8 @@ void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
             float bearing = std::atan2(dy, dx) - theta;
 
             // Normalize bearing to [-pi, pi]
-            if (bearing > M_PI) bearing -= 2 * M_PI;
-            if (bearing < -M_PI) bearing += 2 * M_PI;
+            while (bearing > M_PI) bearing -= 2 * M_PI;
+            while (bearing < -M_PI) bearing += 2 * M_PI;
 
             //Compute H matrix
             H <<  -dx/sqrt(q), -dy/sqrt(q), 0,
@@ -73,7 +77,9 @@ void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
             std::cout << "x: " <<  X(0) << " y: " <<  X(1) << " Thet: " <<  X(2) << std::endl;
             logger->logPosition("Update",Position(X(0),X(1),X(2)));
 
-            
+            //EKF Predictions should continue from updated states
+            X_hat = X;
+            P_hat = P;            
 
 
 }

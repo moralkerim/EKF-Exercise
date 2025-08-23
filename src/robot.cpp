@@ -41,8 +41,8 @@ std::vector<Measurement> Robot::senseLandmarks(const std::unordered_map<int, std
 
 
         // Normalize bearing to [-pi, pi]
-        if (bearing > M_PI) bearing -= 2 * M_PI;
-        if (bearing < -M_PI) bearing += 2 * M_PI;
+        while (bearing > M_PI) bearing -= 2 * M_PI;
+        while (bearing < -M_PI) bearing += 2 * M_PI;
 
         //Check if we have a measurement
         if (range <= range_limit && std::abs(bearing) <= bearing_limit_rad) {
