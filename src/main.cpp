@@ -81,15 +81,17 @@ int main() {
 
     // Landmarks as unordered maps
     std::unordered_map<int, std::shared_ptr<Landmark>> landmarks;
-    landmarks.emplace(1, std::make_shared<Landmark>(1,  5.0f,  5.0f));
-    landmarks.emplace(2, std::make_shared<Landmark>(2,  6.0f,  8.0f));
-    landmarks.emplace(3, std::make_shared<Landmark>(3,  7.0f,  12.0f));
+    landmarks.emplace(0, std::make_shared<Landmark>(0,   5.0f,  5.0f));
+    landmarks.emplace(1, std::make_shared<Landmark>(1,   6.0f,  8.0f));
+    landmarks.emplace(2, std::make_shared<Landmark>(2,   7.0f,  12.0f));
+    landmarks.emplace(3, std::make_shared<Landmark>(3,  -2.0f,  12.0f));
 
 
-    double total_time = 5.0;
     double dt = 1.0;
-    double v = 3.0;    // Linear speed
-    double w = 0.3;    // Angular speed
+    double v = 2.0;    // Linear speed
+    double r = 8.0;    // Robot turn radius
+    double w = v/r;    // Angular speed
+    double total_time = 2*M_PI/w;
 
     std::cout << "Starting Position:\n";
     robot.print();
