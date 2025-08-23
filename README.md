@@ -28,9 +28,9 @@ cd build
 Move log file next to plotter:
 ```bash
 cp poses.txt ~/EKF-Exercise/plotter
-python3 plotter.py
+python3 plotter_anim.py
 ```
-You should see random robot poses, EKF prediction and EKF update poses.
+You should see robot pose with uncertainty, EKF prediction and EKF update poses. Note that when robot sees a landmark, uncertainty ellipsoids of prediction and update gets smaller.
 
 ![Example usage](example.png)
 
@@ -48,9 +48,11 @@ float q_t = 0.034;
 You can change robot input to change its position
 
 ```bash
-double dt = 1.0;
-double v = 3.0;    // Linear speed
-double w = 0.3;    // Angular speed
+double dt = 1.0;    //Time step
+double v = 2.0;    // Linear speed
+double r = 8.0;    // Robot turn radius
+double w = v/r;    // Angular speed
+double total_time = 2*M_PI/w;
 ```
 
 You can change or add new landmarks
@@ -58,9 +60,10 @@ You can change or add new landmarks
 ```bash
 // Landmarks as unordered maps
 std::unordered_map<int, std::shared_ptr<Landmark>> landmarks;
-landmarks.emplace(1, std::make_shared<Landmark>(1,  5.0f,  5.0f));
-landmarks.emplace(2, std::make_shared<Landmark>(2,  6.0f,  8.0f));
-landmarks.emplace(3, std::make_shared<Landmark>(3,  7.0f,  12.0f));
+landmarks.emplace(0, std::make_shared<Landmark>(0,   5.0f,  5.0f));
+landmarks.emplace(1, std::make_shared<Landmark>(1,   6.0f,  8.0f));
+landmarks.emplace(2, std::make_shared<Landmark>(2,   7.0f,  12.0f));
+landmarks.emplace(3, std::make_shared<Landmark>(3,  -2.0f,  12.0f));
 ```
 
 
@@ -68,6 +71,7 @@ landmarks.emplace(3, std::make_shared<Landmark>(3,  7.0f,  12.0f));
 
 - `src/` - Source code
 - `include/` - Header files
+- `plotter/` - Python files for animation
 
 ## License
 

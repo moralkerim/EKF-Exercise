@@ -87,7 +87,7 @@ int main() {
     landmarks.emplace(3, std::make_shared<Landmark>(3,  -2.0f,  12.0f));
 
 
-    double dt = 1.0;
+    double dt = 1.0;    //Time step
     double v = 2.0;    // Linear speed
     double r = 8.0;    // Robot turn radius
     double w = v/r;    // Angular speed
