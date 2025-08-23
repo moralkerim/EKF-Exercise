@@ -1,8 +1,9 @@
 #include "robot.hpp"
 
-void Robot::move(double distance, double angle) {
+void Robot::move(double distance, double angle, int t) {
     // Gürültü ekle
     Position pos_sample;
+    std::vector<float> zero_vec = {0.0f, 0.0f, 0.0f};
     for(int i=0;i<SAMPLE_NUMBER-1;i++) {
         double noisy_distance = distance + dist_noise(gen);
         double noisy_angle = angle + angle_noise(gen);
@@ -10,13 +11,13 @@ void Robot::move(double distance, double angle) {
         pos_sample.theta = pos.theta + noisy_angle;
         pos_sample.x = pos.x + noisy_distance * cos(pos_sample.theta);
         pos_sample.y = pos.y + noisy_distance * sin(pos_sample.theta);
-        logger->logPosition("Gaussian",pos_sample);
+        //logger->logPosition("Gaussian",pos_sample,t,zero_vec);
     }
 
         pos.theta = pos_sample.theta;
         pos.x = pos_sample.x;
         pos.y = pos_sample.y;
-        logger->logPosition("Actual",pos);
+        logger->logPosition("Actual",pos,t,s_r);
 }
 
 void Robot::print() const {

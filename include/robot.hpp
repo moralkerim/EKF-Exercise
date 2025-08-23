@@ -46,11 +46,16 @@ public:
         }
     }
 
-    void logPosition(const std::string& label, const Position& pos) {
+    void logPosition(const std::string& label, const Position& pos, double t, std::vector<float> s) {
         file << label << ", "
              << pos.x << ", "
              << pos.y << ", "
-             << pos.theta << "\n";
+             << pos.theta << ", "
+             << t << ", "
+             << s[0] << ", "
+             << s[1] << ", "
+             << s[2] << "\n ";
+
     }
 
 private:
@@ -72,7 +77,7 @@ public:
       bear_noise(0.0, r_a),   // 1 degree ≈ 0.017 rad
       logger(logger_)
     {}
-    void move(double distance, double angle);
+    void move(double distance, double angle, int t);
 
     void print() const;
 
@@ -90,6 +95,8 @@ private:
     float q_x = 0.5;
     float q_y = 0.5;
     float q_t = 0.034;
+
+    std::vector<float> s_r = {q_x,q_y,q_t};
 
     std::default_random_engine gen;
     std::normal_distribution<double> dist_noise;

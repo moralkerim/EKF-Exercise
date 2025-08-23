@@ -44,9 +44,9 @@ class EKF {
          Eigen::Vector3f& X0_,
          std::shared_ptr<Logger>& logger_);
 
-        void predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U);
+        void predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U, int t);
 
-        void update(const Measurement& Z, const std::shared_ptr<Landmark>& lm);
+        void update(const Measurement& Z, const std::shared_ptr<Landmark>& lm, int t);
 
     private:
         Eigen::Matrix3f F;

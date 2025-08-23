@@ -101,10 +101,10 @@ int main() {
 
     //Run for total time with dt steps
     for (double t = 0; t < total_time; t += dt) {
-        robot.move(v, w); //Move and take samples
+        robot.move(v, w,t); //Move and take samples
         std::cout << "\nt=" << t + dt << std::endl;
         robot.print();
-        ekf.predict(ekf.X, U); //EKF Prediction step.
+        ekf.predict(ekf.X, U,t); //EKF Prediction step.
         auto measurements = robot.senseLandmarks(landmarks); //Take measurements
         //Check if we have a measurement
         if(!measurements.empty()) {
@@ -112,7 +112,7 @@ int main() {
             for(auto& z : measurements) {
                 auto lm = FindAssociation(z,landmarks);
                 if(lm) {
-                    ekf.update(z,lm);
+                    ekf.update(z,lm,t);
                 }
             }
 
@@ -122,7 +122,7 @@ int main() {
 
     //Put Landmarks to the log
     for(const auto& [id,lm] : landmarks) {
-        logger->logPosition("Landmark",Position(lm->x,lm->y,0));
+        logger->logPosition("Landmark",Position(lm->x,lm->y,0),0,{0.0f,0.0f,0.0f});
     }
 
     return 0;

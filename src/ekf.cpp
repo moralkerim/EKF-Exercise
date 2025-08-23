@@ -11,7 +11,7 @@ EKF::EKF(Eigen::Matrix2f& R_,
 {}
 
 
-void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
+void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U, int t) {
     float& x_prev = X_prev(0);
     float& y_prev = X_prev(1);
     float& theta_prev = X_prev(2);
@@ -33,12 +33,18 @@ void EKF::predict(Eigen::Vector3f& X_prev, Eigen::Vector2f& U) {
     X = X_hat;
     P = P_hat;
 
+    //Take position covs
+    std::vector<float> s;
+    s.emplace_back(P(0,0));
+    s.emplace_back(P(1,1));
+    s.emplace_back(P(0,1));
+
     std::cout << "EKF prediction: " << std::endl;
     std::cout << "x: " <<  X_hat(0) << " y: " <<  X_hat(1) << " Thet: " <<  X_hat(2) << std::endl;
-    logger->logPosition("Prediction",Position(X_hat(0),X_hat(1),X_hat(2)));
+    logger->logPosition("Prediction",Position(X_hat(0),X_hat(1),X_hat(2)),t,s);
 }
 
-void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
+void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm, int t) {
 
             Eigen::Vector2f Z_vec;
             Z_vec(0) = Z.range;
@@ -73,13 +79,19 @@ void EKF::update(const Measurement& Z, const std::shared_ptr<Landmark>& lm) {
             X = X_hat + Kt*(Z_vec - Z_hat);
             P = P_hat - Kt*S_in*Kt.transpose();
 
-            std::cout << "EKF update: " << std::endl;
-            std::cout << "x: " <<  X(0) << " y: " <<  X(1) << " Thet: " <<  X(2) << std::endl;
-            logger->logPosition("Update",Position(X(0),X(1),X(2)));
-
             //EKF Predictions should continue from updated states
             X_hat = X;
             P_hat = P;            
+
+            //Take position covs
+            std::vector<float> s;
+            s.emplace_back(P(0,0));
+            s.emplace_back(P(1,1));
+            s.emplace_back(P(0,1));
+
+            std::cout << "EKF update: " << std::endl;
+            std::cout << "x: " <<  X(0) << " y: " <<  X(1) << " Thet: " <<  X(2) << std::endl;
+            logger->logPosition("Update",Position(X(0),X(1),X(2)),t,s);
 
 
 }
