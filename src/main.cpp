@@ -29,6 +29,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include "definitions.hpp"
 #include "robot.hpp"
 #include "ekf.hpp"
 

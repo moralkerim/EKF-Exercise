@@ -7,61 +7,11 @@
 #include<unordered_map>
 #include <cmath>
 #include <vector>
+#include "definitions.hpp"
+#include "logger.hpp"
 
 
 const int SAMPLE_NUMBER = 50;
-
-struct Landmark {
-    int id;
-    float x;
-    float y;
-
-    Landmark(int id_, float x_, float y_) : id(id_), x(x_), y(y_) {}
-};
-
-struct Measurement {
-    int id;
-    float range;
-    float bearing;
-
-    Measurement(int id_, float range_, float bearing_) : id(id_), range(range_), bearing(bearing_) {}
-};
-
-struct Position {
-    double x;
-    double y;
-    double theta;
-
-    Position(double x_=0, double y_=0, double theta_=0) : x(x_), y(y_), theta(theta_) {}
-};
-
-
-class Logger {
-public:
-    Logger(const std::string& filename) 
-        : file(filename) 
-    {
-        if (!file.is_open()) {
-            throw std::runtime_error("Could not open log file!");
-        }
-    }
-
-    void logPosition(const std::string& label, const Position& pos, double t, std::vector<float> s) {
-        file << label << ", "
-             << pos.x << ", "
-             << pos.y << ", "
-             << pos.theta << ", "
-             << t << ", "
-             << s[0] << ", "
-             << s[1] << ", "
-             << s[2] << "\n ";
-
-    }
-
-private:
-    std::ofstream file;
-
-};
 
 class Robot {
 public:

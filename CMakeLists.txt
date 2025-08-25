@@ -10,9 +10,11 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # Library targets
 add_library(robot src/robot.cpp)
 add_library(ekf src/ekf.cpp)
+add_library(logger src/logger.cpp)
+
 
 # Executable
 add_executable(ekf_main src/main.cpp)
 
 # Link libraries to executable
-target_link_libraries(ekf_main PRIVATE robot ekf)
+target_link_libraries(ekf_main PRIVATE robot ekf logger)

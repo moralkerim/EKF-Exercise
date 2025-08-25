@@ -32,7 +32,8 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <fstream>
-#include "robot.hpp"
+#include "definitions.hpp"
+#include "logger.hpp"
 
 
 
